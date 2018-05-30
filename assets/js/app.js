@@ -135,6 +135,7 @@ function makeResponsive(){
       .attr("cx", (d, i) => xScale(d.limitedEnglish))
       .attr("cy", d => yScale(d.NoCoverage))
       .attr("r", "10")
+      .style("opacity",0.5)
       .attr("fill", "lightblue");
 
     circlesAndtextGroup.selectAll("states")
@@ -160,17 +161,17 @@ function makeResponsive(){
     circlesGroup.on("mouseover", function(d){
       d3.select(this)
         .transition()
-        .duration(1000)
+        .duration(500)
         .attr("r", 20)
-        .attr("fill", "grey");
+        .style("opacity",1);
       toolTip.show(d);
     })
       .on("mouseout", function(d){
         d3.select(this)
           .transition()
-          .duration(1000)
+          .duration(500)
           .attr("r", 10)
-          .attr("fill", "lightblue");
+          .style("opacity",0.5);
         toolTip.hide(d);
       })
 
