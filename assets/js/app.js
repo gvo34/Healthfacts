@@ -22,7 +22,7 @@ function makeResponsive(){
   var margin = {
     top: 50,
     right: 50,
-    bottom: 50,
+    bottom: 150,
     left: 150
   };
 
@@ -33,7 +33,7 @@ function makeResponsive(){
 
 
   // Import Data 1
-  d3.csv("assets/data/lastcheck.csv", function (err, stateData) {
+  d3.csv("assets/data/data.csv", function (err, stateData) {
     if (err) throw err;
 
     // Step 1: Parse Data/Cast as numbers
@@ -43,6 +43,7 @@ function makeResponsive(){
       d.NoCoverage = +d.NoCoverage;
       d.LastCheck5 = +d.LastCheck5;
       d.CostNoVisit = +d.CostNoVisit;
+      d.Pop65 = +d.Pop65;
     });
 
     console.log(stateData);
@@ -104,28 +105,8 @@ function makeResponsive(){
     chartGroup.append("g")
       .call(yAxis);
 
+    // append circles to data points to initial display 
 
-    // Multile axis for different scales
-    // var yAxisNC = d3.axisLeft(yScaleNC);    
-    // var yAxisLV = d3.axisLeft(yScaleLV);
-    // var yAxisCV = d3.axisLeft(yScaleCV);
-    // var xAxis = d3.axisBottom(xScaleLE);
-    // chartGroup.append("g")
-    // .attr("transform", `translate(0, ${chartHeight})`)
-    // .call(xAxis);
-    // // set y to the y axis
-    // chartGroup.append("g")
-    // .call(yAxisNC);
-    // chartGroup.append("g")
-    // .attr("transform",`translate(${50}, 0)`)
-    // .call(yAxisLV);
-    // chartGroup.append("g")
-    // .attr("transform",`translate(${100}, 0)`)
-    // .call(yAxisCV);
-
-
-
-    // append circles to data points
     var circlesAndtextGroup = chartGroup.append("g");
 
     var circlesGroup = circlesAndtextGroup.selectAll("circle")
@@ -179,107 +160,143 @@ function makeResponsive(){
 
     // Create axes labels
 
-    var labels1Group = chartGroup.append("g");
+    // X- labels and scale
+    // X1 : data point 1
+    // X2 : data point 2
+    var labelsX1Group = chartGroup.append("g");
 
-    labels1Group.append("text")
+    labelsX1Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  40})`)
     .attr("class","axis-text")
     .text("Population for Limited English Households");
 
-    labels1Group.append("text")
+    labelsX1Group.on("click",function(d){
+      d3.selectAll("circle")
+        .transition()
+        .duration(1000)
+        .attr("r", 10)
+        .attr("fill", "lightblue")
+        .attr("cx", (d, i) => xScale(d.limitedEnglish));
+
+      d3.selectAll(".circle-text")
+        .transition()
+        .duration(1000)
+        .attr("x", (d, i) => xScale(d.limitedEnglish))
+        .attr("dx", function(d){return -7})
+      
+      xScale 
+        .trasition()
+        .duration(1000)
+        .domain([0, d3.max(stateData, d => d.limitedEnglish)]);
+    });
+
+    var labelsX2Group = chartGroup.append("g");
+
+    labelsX2Group.append("text")
+    .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  60})`)
+    .attr("class","axis-text")
+    .text("Age over 65");
+
+    labelsX2Group.on("click",function(d){
+      d3.selectAll("circle")
+        .transition()
+        .duration(1000)
+        .attr("r", 10)
+        .attr("fill", "lightgreen")
+        .attr("cx", (d, i) => xScale(d.Pop65));
+
+      d3.selectAll(".circle-text")
+        .transition()
+        .duration(1000)
+        .attr("x", (d, i) => xScale(d.Pop65))
+        .attr("dx", function(d){return -7})
+      
+      xScale 
+        .trasition()
+        .duration(1000)
+        .domain([0, d3.max(stateData, d => d.Pop65)]);
+    });
+
+
+
+    // Y- labels
+    // Y1: set Y values to Y1 data point 
+    // Y2: set Y values to Y2 data point 
+    // Y3: set Y values to Y3 data point 
+
+    var labelsY1Group = chartGroup.append("g");
+    labelsY1Group.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 0 - margin.left - 50)
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
     .text("No Health Coverage % ");
-
-    labels1Group.on("click",function(d){
+    labelsY1Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightblue")
-        .attr("cx", (d, i) => xScale(d.limitedEnglish))
         .attr("cy", d => yScale(d.NoCoverage));
-
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("x", (d, i) => xScale(d.limitedEnglish))
         .attr("y", d => yScale(d.NoCoverage))
         .attr("dx", function(d){return -7})
         .attr("dy", function(d){return +4})
     });
     
-    var labels2Group = chartGroup.append("g");
-
-    labels2Group.append("text")
+    var labelsY2Group = chartGroup.append("g");
+    labelsY2Group.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 0 - margin.left - 80)
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
     .text("No Visit due to cost");
-
-    labels2Group.on("click",function(d){
+    labelsY2Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "red")
-        .attr("cx", (d, i) => xScale(d.limitedEnglish))
         .attr("cy", d => yScale(d.CostNoVisit));
-
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("x", (d, i) => xScale(d.limitedEnglish))
         .attr("y", d => yScale(d.CostNoVisit))
-        .attr("dx", function(d){return -7})
         .attr("dy", function(d){return +4})
     });
 
-    var labels3Group = chartGroup.append("g");
-
-    labels3Group.append("text")
+    var labelsY3Group = chartGroup.append("g");
+    labelsY3Group.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 0 - margin.left - 110)
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
     .text("Last Visit in te past 5 years");
-
-    labels3Group.on("click",function(d){
+    labelsY3Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightgreen")
-        .attr("cx", (d, i) => xScale(d.limitedEnglish))
         .attr("cy", d => yScale(d.LastCheck5));
-
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("x", (d, i) => xScale(d.limitedEnglish))
         .attr("y", d => yScale(d.LastCheck5))
-        .attr("dx", function(d){return -7})
         .attr("dy", function(d){return +4})
     });
-    // labels2Group.append("text")
-    // .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  40})`)
-    // .attr("class","axis-text")
-    // .text("Population for Limited English Households");
 
 
-
-
-
-
-    
+    // add tool tip for pop up
     chartGroup.call(toolTip);
-    }); // end of csv data 1
+
+
+  }); // end of csv data 1
 
 
   }; // end of MakeResponsive
