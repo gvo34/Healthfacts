@@ -33,7 +33,7 @@ function makeResponsive(){
 
 
   // Import Data 1
-  d3.csv("assets/data/data.csv", function (err, stateData) {
+  d3.csv("assets/data/data2.csv", function (err, stateData) {
     if (err) throw err;
 
     // Step 1: Parse Data/Cast as numbers
@@ -61,7 +61,7 @@ function makeResponsive(){
     // scales
 
     var xScale = d3.scaleLinear()
-      .domain([0, d3.max(stateData, d => d.limitedEnglish)])
+      .domain([0, d3.max(stateData, d => d.Pop65)])
       .range([0, chartWidth]);
 
     var yScale = d3.scaleLinear()
