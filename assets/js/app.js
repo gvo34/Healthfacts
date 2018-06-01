@@ -31,23 +31,35 @@ function makeResponsive(){
   var chartHeight = svgHeight - margin.top - margin.bottom;
   var chartWidth = svgWidth - margin.left - margin.right;
 
+  // Labels to match input values for the scatter plot (demographics for x values and brfss for y values)
+  // demog1, demog2
+  demographics = ["demographics 1", 
+                  "demographics 2",
+                  "demographics 3"];
+  // brfss1, brfss2, brfss3
+  behaviour_risk_factor_ss = ["Last Checkup Visit over 5 years",
+                              "No Visit due to cost",
+                              "No Health Insurance Coverage"]
+
 
   // Import Data 1
-  d3.csv("assets/data/data2.csv", function (err, stateData) {
+  d3.csv("assets/data/data3.csv", function (err, stateData) {
     if (err) throw err;
 
     // Step 1: Parse Data/Cast as numbers
     // ==============================
     stateData.forEach(function (d) {
-      d.limitedEnglish = +d.limitedEnglish
-      d.NoCoverage = +d.NoCoverage;
-      d.LastCheck5 = +d.LastCheck5;
-      d.CostNoVisit = +d.CostNoVisit;
-      d.Pop65 = +d.Pop65;
+      // x-values
+      d.demog1 = +d.demog1;
+      d.demog2 = +d.demog2;
+
+      // y-values
+      d.brfss1 = +d.brfss1;
+      d.brfss2 = +d.brfss2;
+      d.brfss3 = +d.brfss3;
     });
 
     console.log(stateData);
-
 
     // append svg and group
     var svg = d3.select(".chart")
@@ -59,62 +71,36 @@ function makeResponsive(){
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     // scales
-
     var xScale = d3.scaleLinear()
-      .domain([0, d3.max(stateData, d => d.Pop65)])
+      .domain([0, d3.max(stateData, d => d.demog1)])
       .range([0, chartWidth]);
 
     var yScale = d3.scaleLinear()
-      .domain([0, d3.max(stateData,d => d.NoCoverage)])
+      .domain([0, d3.max(stateData,d => d.brfss1)])
       .range([chartHeight, 0]);
-
-    // Multiple Scales for different values
-    // var xScaleLE = d3.scaleLinear()
-    //   .domain([0, d3.max(stateData, d => d.LimitedEnglish)])
-    //   .range([0, chartWidth]);
-
-    // var yScaleNC = d3.scaleLinear()
-    //   .domain([0, d3.max(stateData,d => d.NoCoverage)])
-    //   .range([chartHeight, 0]);
-
-    // var yScaleLV = d3.scaleLinear()
-    //   .domain([0, d3.max(stateData,d => d.LastVisit5)])
-    //   .range([chartHeight, 0]);
-
-    // var yScaleCV = d3.scaleLinear()
-    //   .domain([0, d3.max(stateData,d => d.CostNoVisit)])
-    //   .range([chartHeight, 0]);
-  
-
     
-    // line generator
-    var line = d3.line()
-      .x((d, i) => xScale(i))
-      .y(d => yScale(d));
-
-
 
     // create axes
     var yAxis = d3.axisLeft(yScale);    
     var xAxis = d3.axisBottom(xScale);
+    
     // set x to the bottom of the chart
     chartGroup.append("g")
       .attr("transform", `translate(0, ${chartHeight})`)
       .call(xAxis);
-    // set y to the y axis
+    
+      // set y to the y axis
     chartGroup.append("g")
       .call(yAxis);
 
     // append circles to data points to initial display 
-
     var circlesAndtextGroup = chartGroup.append("g");
-
     var circlesGroup = circlesAndtextGroup.selectAll("circle")
       .data(stateData)
       .enter()
       .append("circle")
-      .attr("cx", (d, i) => xScale(d.limitedEnglish))
-      .attr("cy", d => yScale(d.NoCoverage))
+      .attr("cx", (d, i) => xScale(d.demog1))
+      .attr("cy", d => yScale(d.brfss1))
       .attr("r", "10")
       .style("opacity",0.5)
       .attr("fill", "lightblue");
@@ -123,20 +109,19 @@ function makeResponsive(){
       .data(stateData)
       .enter()
       .append("text")
-      .attr("x", (d, i) => xScale(d.limitedEnglish))
-      .attr("y", d => yScale(d.NoCoverage))
+      .attr("x", (d, i) => xScale(d.demog1))
+      .attr("y", d => yScale(d.brfss1))
       .attr("dx", function(d){return -7})
       .attr("dy", function(d){return +4})
       .text(function(d){return d.ST})
       .attr("class","circle-text");
 
     // Event listeners with transitions
-    
     var toolTip = d3.tip()
       .attr("class","tooltip")
       .offset([80,-60])
       .html(function(d){
-        return (`<strong>${d.NoCoverage}<strong><hr>${d.limitedEnglish}`);
+        return (`<strong>${d.state}<strong><hr>${d.demog1} / ${d.brfss1}`);
       })
     
     circlesGroup.on("mouseover", function(d){
@@ -168,7 +153,7 @@ function makeResponsive(){
     labelsX1Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  40})`)
     .attr("class","axis-text")
-    .text("Population for Limited English Households");
+    .text(demographics[0]);
 
     labelsX1Group.on("click",function(d){
       d3.selectAll("circle")
@@ -176,18 +161,18 @@ function makeResponsive(){
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightblue")
-        .attr("cx", (d, i) => xScale(d.limitedEnglish));
+        .attr("cx", (d, i) => xScale(d.demog1));
 
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("x", (d, i) => xScale(d.limitedEnglish))
+        .attr("x", (d, i) => xScale(d.demog1))
         .attr("dx", function(d){return -7})
       
       xScale 
         .trasition()
         .duration(1000)
-        .domain([0, d3.max(stateData, d => d.limitedEnglish)]);
+        .domain([0, d3.max(stateData, d => d.demog1)]);
     });
 
     var labelsX2Group = chartGroup.append("g");
@@ -195,7 +180,7 @@ function makeResponsive(){
     labelsX2Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  60})`)
     .attr("class","axis-text")
-    .text("Age over 65");
+    .text(demographics[1]);
 
     labelsX2Group.on("click",function(d){
       d3.selectAll("circle")
@@ -203,20 +188,46 @@ function makeResponsive(){
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightgreen")
-        .attr("cx", (d, i) => xScale(d.Pop65));
+        .attr("cx", (d, i) => xScale(d.demog2));
 
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("x", (d, i) => xScale(d.Pop65))
+        .attr("x", (d, i) => xScale(d.demog2))
         .attr("dx", function(d){return -7})
       
       xScale 
         .trasition()
         .duration(1000)
-        .domain([0, d3.max(stateData, d => d.Pop65)]);
+        .domain([0, d3.max(stateData, d => d.demog2)]);
     });
 
+    var labelsX3Group = chartGroup.append("g");
+
+    labelsX3Group.append("text")
+    .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  80})`)
+    .attr("class","axis-text")
+    .text(demographics[2]);
+
+    labelsX3Group.on("click",function(d){
+      d3.selectAll("circle")
+        .transition()
+        .duration(1000)
+        .attr("r", 10)
+        .attr("fill", "lightgreen")
+        .attr("cx", (d, i) => xScale(d.demog3));
+
+      d3.selectAll(".circle-text")
+        .transition()
+        .duration(1000)
+        .attr("x", (d, i) => xScale(d.demog3))
+        .attr("dx", function(d){return -7})
+      
+      xScale 
+        .trasition()
+        .duration(1000)
+        .domain([0, d3.max(stateData, d => d.demog3)]);
+    });
 
 
     // Y- labels
@@ -231,18 +242,18 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
-    .text("No Health Coverage % ");
+    .text(behaviour_risk_factor_ss[0]);
     labelsY1Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightblue")
-        .attr("cy", d => yScale(d.NoCoverage));
+        .attr("cy", d => yScale(d.brfss1));
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("y", d => yScale(d.NoCoverage))
+        .attr("y", d => yScale(d.brfss1))
         .attr("dx", function(d){return -7})
         .attr("dy", function(d){return +4})
     });
@@ -254,18 +265,18 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
-    .text("No Visit due to cost");
+    .text(behaviour_risk_factor_ss[1]);
     labelsY2Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "red")
-        .attr("cy", d => yScale(d.CostNoVisit));
+        .attr("cy", d => yScale(d.brfss2));
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("y", d => yScale(d.CostNoVisit))
+        .attr("y", d => yScale(d.brfss2))
         .attr("dy", function(d){return +4})
     });
 
@@ -276,18 +287,18 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text")
-    .text("Last Visit in te past 5 years");
+    .text(behaviour_risk_factor_ss[2]);
     labelsY3Group.on("click",function(d){
       d3.selectAll("circle")
         .transition()
         .duration(1000)
         .attr("r", 10)
         .attr("fill", "lightgreen")
-        .attr("cy", d => yScale(d.LastCheck5));
+        .attr("cy", d => yScale(d.brfss3));
       d3.selectAll(".circle-text")
         .transition()
         .duration(1000)
-        .attr("y", d => yScale(d.LastCheck5))
+        .attr("y", d => yScale(d.brfss3))
         .attr("dy", function(d){return +4})
     });
 
