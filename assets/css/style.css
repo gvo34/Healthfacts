@@ -39,7 +39,7 @@ body {
 .axis-text {
     font-family: sans-serif;
     font-weight: bold;
-    /*fill: #1a56afb7;*/
+    fill: #1a56afb7;
     text-anchor: middle;
     cursor: pointer; 
 }

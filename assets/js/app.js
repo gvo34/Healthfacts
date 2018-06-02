@@ -3,6 +3,12 @@
 d3.select(window).on("resize", makeResponsive);
 
 
+function getLabels(){
+  d3.csv("labels.csv", function(){
+
+  });
+}
+
 
 makeResponsive();
 
@@ -33,16 +39,31 @@ function makeResponsive(){
 
   // Labels to match input values for the scatter plot (demographics for x values and brfss for y values)
   // demog1, demog2
-  demographics = ["Median Age", 
-                  "% Below Poverty Level",
-                  "Percent Imputed Limited English"];
-  // brfss1, brfss2, brfss3
-  behaviour_risk_factor_ss = ["% Tobacco Users",
-                              "% Limited due to Physycal, Mental or emotional problems",
-                              "% Binge Drinkers"]
+  // demographics = ["Median Age", 
+  //                 "% Below Poverty Level",
+  //                 "Percent Imputed Limited English"];
+  // // brfss1, brfss2, brfss3
+  // behaviour_risk_factor_ss = ["% Tobacco Users",
+  //                             "% Limited due to Physycal, Mental or emotional problems",
+  //                             "% Binge Drinkers"]
 
 
-  // Import Data 1
+  demographics = [];
+  behaviour_risk_factor_ss = [];
+
+  // Import Labels
+  d3.csv("assets/data/labels.csv", function (err, dataLabels){
+    if (err) throw err;
+
+    //for (var i=0;i <2; i++){
+    dataLabels.forEach(function (d){
+      demographics.push(d.demographics);
+      behaviour_risk_factor_ss.push(d.behaviourRFSS);  
+    })
+  });
+
+
+  // Import Data 
   d3.csv("assets/data/data.csv", function (err, stateData) {
     if (err) throw err;
 
@@ -107,6 +128,7 @@ function makeResponsive(){
       .attr("cy", d => yScale(d.brfss1))
       .attr("r", "10")
       .style("opacity",0.5)
+      .style("stroke-width",5)
       .style("stroke","black")
       .attr("fill", "lightblue");
 
@@ -155,8 +177,8 @@ function makeResponsive(){
 
     labelsX1Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  40})`)
+    .style("fill","black")
     .attr("class","axis-text demog1")
-    .style("fill","#1a56afb7")
     .text(demographics[0]);
 
     labelsX1Group.on("click",function(d){
@@ -181,18 +203,18 @@ function makeResponsive(){
         .call(xAxis);
 
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.demog1")
+      d3.selectAll(".axis-text.demog1")
         .transition()
         .duration(1000)
         .style("fill", "black");
-      d3.selectAll("axis-text.demog2")
+      d3.selectAll(".axis-text.demog2")
         .transition()
         .duration(1000)
-        .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.demog3")
+        .style("stroke", "#1a56afb7");
+      d3.selectAll(".axis-text.demog3")
         .transition()
         .duration(1000)
-        .style("fill", "#1a56afb7");
+        .style("stroke", "#1a56afb7");
     });
 
     var labelsX2Group = chartGroup.append("g");
@@ -200,7 +222,6 @@ function makeResponsive(){
     labelsX2Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  60})`)
     .attr("class","axis-text demog2")
-    .style("fill","#1a56afb7")
     .text(demographics[1]);
 
     labelsX2Group.on("click",function(d){
@@ -225,15 +246,15 @@ function makeResponsive(){
         .call(xAxis);
 
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.demog2")
+      d3.selectAll(".axis-text.demog2")
         .transition()
         .duration(1000)
         .style("fill", "black");
-      d3.selectAll("axis-text.demog1")
+      d3.selectAll(".axis-text.demog1")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.demog3")
+      d3.selectAll(".axis-text.demog3")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");  
@@ -244,7 +265,6 @@ function makeResponsive(){
     labelsX3Group.append("text")
     .attr("transform", `translate(${chartWidth/2}, ${chartHeight +  80})`)
     .attr("class","axis-text demog3")
-    .style("fill","#1a56afb7")
     .text(demographics[2]);
 
     labelsX3Group.on("click",function(d){
@@ -269,15 +289,15 @@ function makeResponsive(){
         .call(xAxis);
 
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.demog3")
+      d3.selectAll(".axis-text.demog3")
       .transition()
       .duration(1000)
       .style("fill", "black");
-      d3.selectAll("axis-text.demog2")
+      d3.selectAll(".axis-text.demog2")
       .transition()
       .duration(1000)
       .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.demog1")
+      d3.selectAll(".axis-text.demog1")
       .transition()
       .duration(1000)
       .style("fill", "#1a56afb7");     
@@ -293,7 +313,7 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text brfss1")
-    .style("fill","#1a56afb7")
+    .style("fill","black")
     .text(behaviour_risk_factor_ss[0]);
     labelsY1Group.on("click",function(d){
       // reset scale to corrent range
@@ -316,15 +336,15 @@ function makeResponsive(){
       d3.selectAll("g.y.axis")
         .call(yAxis);
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.brfss1")
+      d3.selectAll(".axis-text.brfss1")
         .transition()
         .duration(1000)
         .style("fill", "black");
-      d3.selectAll("axis-text.brfss2")
+      d3.selectAll(".axis-text.brfss2")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.brfss3")
+      d3.selectAll(".axis-text.brfss3")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
@@ -337,7 +357,6 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text brfss2")
-    .style("fill","#1a56afb7")
     .text(behaviour_risk_factor_ss[1]);
     labelsY2Group.on("click",function(d){
       // reset scale to corrent range
@@ -359,15 +378,15 @@ function makeResponsive(){
       d3.selectAll("g.y.axis")
         .call(yAxis);
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.brfss1")
+      d3.selectAll(".axis-text.brfss2")
         .transition()
         .duration(1000)
         .style("fill", "black");
-      d3.selectAll("axis-text.brfss1")
+      d3.selectAll(".axis-text.brfss1")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.brfss3")
+      d3.selectAll(".axis-text.brfss3")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
@@ -380,7 +399,6 @@ function makeResponsive(){
     .attr("x", 0 - (chartHeight / 2))
     .attr("dy", "10em")
     .attr("class","axis-text brfss3")
-    .style("fill","#1a56afb7")
     .text(behaviour_risk_factor_ss[2]);
     labelsY3Group.on("click",function(d){
       // reset scale to corrent range
@@ -402,15 +420,15 @@ function makeResponsive(){
       d3.selectAll("g.y.axis")
         .call(yAxis);
       // update axis text color to highlight the selected demographic
-      d3.selectAll("axis-text.brfss3")
+      d3.selectAll(".axis-text.brfss3")
         .transition()
         .duration(1000)
         .style("fill", "black");
-      d3.selectAll("axis-text.brfss2")
+      d3.selectAll(".axis-text.brfss2")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
-      d3.selectAll("axis-text.brfss1")
+      d3.selectAll(".axis-text.brfss1")
         .transition()
         .duration(1000)
         .style("fill", "#1a56afb7");
